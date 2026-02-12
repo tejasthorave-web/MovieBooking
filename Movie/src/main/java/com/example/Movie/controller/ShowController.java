@@ -1,6 +1,7 @@
 package com.example.Movie.controller;
 
 import com.example.Movie.entity.Show;
+import com.example.Movie.entity.ShowSeat;
 import com.example.Movie.service.ShowService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -19,8 +20,28 @@ public class ShowController {
         return showService.createShow(show);
     }
 
-    @GetMapping("/movie/{movieId}")
-    public List<Show> getShowsByMovie(@PathVariable Long movieId) {
-        return showService.getShowsByMovie(movieId);
+    // map seats to show
+    @PostMapping("/{showId}/seats")
+    public String mapSeats(@PathVariable Long showId,
+                           @RequestBody List<Long> seatIds) {
+
+        showService.createShowSeats(showId, seatIds);
+        return "Seats mapped to show";
     }
+
+    // get availability
+    @GetMapping("/{showId}/seats")
+    public List<ShowSeat> getSeats(@PathVariable Long showId) {
+        return showService.getSeatsByShow(showId);
+    }
+
+    // book seats
+    @PostMapping("/{showId}/book")
+    public String bookSeats(@PathVariable Long showId,
+                            @RequestBody List<Long> seatIds) {
+
+        showService.bookSeats(showId, seatIds);
+        return "Seats booked successfully";
+    }
+
 }

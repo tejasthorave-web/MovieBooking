@@ -51,7 +51,11 @@ public class TheatreService {
                 .orElseThrow(() -> new RuntimeException("Screen not found"));
 
         seat.setScreen(screen);
-        seat.setAvailable(true);
+        if (seat.getIsAvailable() == null){
+            seat.setAvailable(true);
+        } else {
+            seat.setAvailable(seat.getIsAvailable());
+        }
         return seatRepository.save(seat);
     }
 
