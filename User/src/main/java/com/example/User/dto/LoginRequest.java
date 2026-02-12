@@ -2,11 +2,8 @@ package com.example.User.dto;
 
 import lombok.Data;
 
-
 @Data
-public class UserRequest {
-    private String name;
+public class LoginRequest {
     private String email;
-    private String phone;
     private String password;
 }

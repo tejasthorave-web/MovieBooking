@@ -2,7 +2,14 @@ package com.example.User;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+/*
+Registration/login and Profile management
 
+POST http://localhost:8080/users/register -> User registration
+POST http://localhost:8080/users/login -> Login + JWT
+GET /api/users/{id} -> Get profile
+GET /api/users/{id} -> Update profile
+*/
 @SpringBootApplication
 public class UserApplication {
 
@@ -11,18 +18,3 @@ public class UserApplication {
 	}
 
 }
-//APIs
-//Create user
-//POST /users
-//
-//Get all users
-//GET /users
-//
-//Get user by id
-//GET /users/{id}
-
-//Role
-//Manages customer accounts
-//Used by booking-service
-//Used by payment-service
-//Linked with notification-service later
