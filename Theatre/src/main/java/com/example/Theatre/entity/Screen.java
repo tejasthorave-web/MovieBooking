@@ -1,8 +1,11 @@
 package com.example.Theatre.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
 
 @Entity
 @Data
@@ -11,17 +14,19 @@ import lombok.*;
 @Builder
 public class Screen {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
-    private Long theatreId;
-
-
     private String screenName;
+    private Integer totalSeats;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "theatre_id")
+    @JsonBackReference
+    private Theatre theatre;
 
-    private int totalSeats;
+    @OneToMany(mappedBy = "screen", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Seat> seats;
 }

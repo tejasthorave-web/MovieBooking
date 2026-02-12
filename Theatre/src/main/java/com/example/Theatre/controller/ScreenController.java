@@ -17,6 +17,10 @@ public class ScreenController {
 
     private final ScreenService screenService;
 
+    @GetMapping
+    public List<Screen> getAllScreens() {
+        return screenService.getAllScreens();
+    }
 
     @PostMapping
     public Screen addScreen(@RequestBody Screen screen) {

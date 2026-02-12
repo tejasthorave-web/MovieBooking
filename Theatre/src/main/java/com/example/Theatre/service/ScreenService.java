@@ -27,4 +27,8 @@ public class ScreenService {
     public List<Screen> getScreensByTheatre(Long theatreId) {
         return screenRepository.findByTheatreId(theatreId);
     }
+
+    public List<Screen> getAllScreens() {
+        return null;
+    }
 }
