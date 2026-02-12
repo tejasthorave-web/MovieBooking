@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "movie_show")
 public class Show {
 
     @Id
@@ -20,6 +21,7 @@ public class Show {
 
     private Long theatreId;
 
+    @Column(name = "show_time")
     private LocalDateTime showTime;
 
     private int availableSeats;

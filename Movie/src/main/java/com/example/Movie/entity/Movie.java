@@ -12,7 +12,6 @@ import jakarta.persistence.Id;
 
 @Entity
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Movie {
@@ -20,12 +19,17 @@ public class Movie {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String title;
-
     private String genre;
-
+    private String language;
     private int duration;
 
-    private String language;
+    public Movie() {}
+
+    public Movie(String title, String language, String genre, int duration) {
+        this.title = title;
+        this.language = language;
+        this.genre = genre;
+        this.duration = duration;
+    }
 }
