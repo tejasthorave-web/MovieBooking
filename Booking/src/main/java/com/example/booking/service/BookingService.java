@@ -1,57 +1,67 @@
 package com.example.booking.service;
 
-import com.example.booking.dto.BookingRequest;
-import com.example.booking.dto.BookingResponse;
 import com.example.booking.entity.Booking;
-//import com.example.booking.producer.BookingEventProducer;
+import com.example.booking.entity.BookingSeat;
+import com.example.booking.entity.BookingStatus;
 import com.example.booking.repository.BookingRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
+import com.example.booking.repository.BookingSeatRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class BookingService {
 
-    private final BookingRepository bookingRepository;
-    private final RedisTemplate<String, Object> redisTemplate;
-//    private final BookingEventProducer producer;
+    @Autowired
+    private BookingRepository bookingRepository;
 
-    public BookingResponse bookTicket(BookingRequest request) {
+    @Autowired
+    private BookingSeatRepository bookingSeatRepository;
 
-        String lockKey = "seat_lock_" + request.getShowId() + "_" + request.getSeatNumbers();
+    @Autowired
+    private SeatLockService seatLockService;
 
-        Boolean isLocked = redisTemplate.hasKey(lockKey);
-        if (Boolean.TRUE.equals(isLocked)) {
-            return BookingResponse.builder()
-                    .status("FAILED")
-                    .message("Seat already locked!")
-                    .build();
+    @Autowired
+    private KafkaTemplate<String, Object> kafkaTemplate;
+
+    public String lockSeats(Long showId, List<Long> seatIds, Long userId) {
+
+        boolean locked = seatLockService.lockSeats(showId, seatIds, userId);
+        if (!locked) {
+            return "Seats already locked!";
         }
 
-        redisTemplate.opsForValue().set(lockKey, "LOCKED");
+        return "Seats locked successfully";
+    }
 
-        Booking booking = Booking.builder()
-                .userId(request.getUserId())
-                .showId(request.getShowId())
-                .seatNumbers(String.valueOf(request.getSeatNumbers()))
-                .status("CONFIRMED")
-                .bookingTime(LocalDateTime.now())
-                .amount(250.0)
-                .build();
+    public Booking createBooking(Long userId, Long showId, List<Long> seatIds, Double amount) {
 
-        Booking saved = bookingRepository.save(booking);
+        Booking booking = new Booking();
+        booking.setUserId(userId);
+        booking.setShowId(showId);
+        booking.setTotalAmount(amount);
+        booking.setStatus(BookingStatus.CONFIRMED);
+        booking.setCreatedAt(LocalDateTime.now());
 
-//        producer.publishBookingEvent("Booking Confirmed: " + saved.getId());
+        Booking savedBooking = bookingRepository.save(booking);
 
-        return BookingResponse.builder()
-                .bookingId(saved.getId())
-                .status("SUCCESS")
-                .message("Booking confirmed")
-                .build();
+        for (Long seatId : seatIds) {
+            BookingSeat bs = new BookingSeat();
+            bs.setBookingId(savedBooking.getId());
+            bs.setSeatId(seatId);
+            bookingSeatRepository.save(bs);
+        }
+
+        kafkaTemplate.send("booking-created-topic", savedBooking);
+
+        return savedBooking;
+    }
+
+    public Booking getBooking(Long id) {
+        return bookingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
     }
 }
-
-
